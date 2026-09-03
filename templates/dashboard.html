@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Comment Bot Dashboard</title>
+  <style>
+    body { font-family: sans-serif; background:#f4f4f7; margin:0; padding:16px; }
+    .card { background:white; padding:20px; border-radius:12px; margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+    h2 { margin-top:0; font-size:18px; }
+    input, textarea { width:100%; padding:10px; margin-top:6px; border-radius:8px; border:1px solid #ccc; box-sizing:border-box; font-family:inherit; }
+    button, .btn { display:inline-block; padding:10px 16px; margin-top:10px; border:none; border-radius:8px; background:#2b2d84; color:white; font-size:14px; text-decoration:none; cursor:pointer; }
+    .btn-toggle-on { background:#639922; }
+    .btn-toggle-off { background:#993c1d; }
+    .status { padding:6px 10px; border-radius:6px; font-size:13px; display:inline-block; margin-bottom:8px; }
+    .status-ok { background:#EAF3DE; color:#27500A; }
+    .status-off { background:#FAEEDA; color:#633806; }
+    .log { font-size:13px; padding:8px 0; border-bottom:1px solid #eee; }
+    .log-time { color:#888; margin-right:8px; }
+    a.logout { float:right; font-size:13px; color:#888; }
+  </style>
+</head>
+<body>
+  <a class="logout" href="/logout">Logout</a>
+  <h2>Comment auto-reply bot</h2>
+
+  <div class="card">
+    <h2>1. Setup</h2>
+    {% if has_config %}
+      <span class="status status-ok">Config saved</span>
+    {% endif %}
+    <form method="post" action="/setup">
+      <input type="text" name="api_key" placeholder="Claude API key (sk-ant-...)" required>
+      <textarea name="persona" rows="3" placeholder="Channel persona/tone, jaise: friendly dental expert, Hinglish me natural baat karta hai" required></textarea>
+      <button type="submit">Save</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>2. YouTube connect</h2>
+    {% if connected %}
+      <span class="status status-ok">Connected</span>
+    {% else %}
+      <span class="status status-off">Not connected</span>
+    {% endif %}
+    <br>
+    <a class="btn" href="/connect">{{ "Reconnect" if connected else "Connect YouTube" }}</a>
+  </div>
+
+  <div class="card">
+    <h2>3. Bot status</h2>
+    <span class="status {{ 'status-ok' if bot_enabled else 'status-off' }}">
+      {{ "ON - chal raha hai" if bot_enabled else "OFF - band hai" }}
+    </span>
+    <br>
+    <form method="post" action="/toggle">
+      <button class="{{ 'btn-toggle-off' if bot_enabled else 'btn-toggle-on' }}" type="submit">
+        {{ "Bot band karo" if bot_enabled else "Bot chalu karo" }}
+      </button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Recent activity</h2>
+    {% for log in logs %}
+      <div class="log"><span class="log-time">{{ log.time }}</span>{{ log.message }}</div>
+    {% else %}
+      <div class="log">Abhi tak koi activity nahi</div>
+    {% endfor %}
+  </div>
+</body>
+</html>
